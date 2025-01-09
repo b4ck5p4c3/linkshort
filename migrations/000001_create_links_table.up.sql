@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS links(
+    id SERIAL PRIMARY KEY,
+    internal_name VARCHAR UNIQUE NOT NULL,
+    remote_url VARCHAR NOT NULL
+);
