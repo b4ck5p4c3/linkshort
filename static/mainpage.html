@@ -1,0 +1,27 @@
+{{define "mainpage.tmpl"}}
+<html>
+<head>
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <script src="./assets/oneko.js"></script>
+
+        <div class="center">
+            <img src="assets/toro_heyyy.png">
+        <div class="nes-container is-dark">
+            <p class="title">howdy!!<br>you've arrived to linkshortener site of Saint-Petersburg's hackerspace <a href="0x08.in">B4CKSP4CE</a>.<br>
+            if you're a resident, press <a href="{{.baseUrl}}/sign-in">here</a>.</p>
+        </div>
+        </div>
+        <div class="down">
+            <img src="assets/toro_seating.png" width="256" height="256">
+            <img src="assets/toro_eat.png">
+        </div>
+</body>
+</html>
+{{end}}

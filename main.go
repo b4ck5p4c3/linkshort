@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	backend "linkshort/internal/backend"
+	"log"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/golang-migrate/migrate"
 	_ "github.com/golang-migrate/migrate/database/postgres"
@@ -18,16 +17,15 @@ import (
 )
 
 var (
-	logLevel     zapcore.Level
-	postgresPath string
+	logLevel       zapcore.Level
+	postgresPath   string
+	logtoAppID     string
+	logtoAppSecret string
+	logtoEndpoint  string
 )
 
+var DefaultlogtoEndpoint = "https://id.bksp.in/"
 var migrationsPath = "migrations/"
-
-var (
-	backendJWKSUrl          = "https://id.bksp.in/oidc/jwks"
-	backendTimeToRefreshJWK = time.Minute * 5
-)
 
 func main() {
 	// init logger with needed loglevel
@@ -47,7 +45,7 @@ func main() {
 	logger.Debugln("applied db migration successfully")
 
 	logger.Debug("initializing backend..")
-	back, err := backend.NewBackend(ctx, postgresPath, backendJWKSUrl, backendTimeToRefreshJWK)
+	back, err := newInstance(ctx, postgresPath, logtoEndpoint, logtoAppID, logtoAppSecret)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -84,6 +82,7 @@ func applyMigrations(logger *zap.SugaredLogger, migrationsPath string, DBPath st
 
 func init() {
 	isDebug := flag.BoolP("debug", "d", false, "enable debug logging")
+	flag.StringVar(&logtoEndpoint, "logto-endpoint", DefaultlogtoEndpoint, "logto instance that app will for auth")
 	flag.Parse()
 
 	if *isDebug {
@@ -94,7 +93,16 @@ func init() {
 
 	postgresPath = os.Getenv("POSTGRESQL_URL")
 	if postgresPath == "" {
-		fmt.Println("env POSTGRESQL_URL is empty")
-		os.Exit(1)
+		log.Fatal("env POSTGRESQL_URL is empty")
+	}
+
+	logtoAppID = os.Getenv("LOGTO_APPID")
+	if logtoAppID == "" {
+		log.Fatal("env LOGTO_APPID is empty")
+	}
+
+	logtoAppSecret = os.Getenv("LOGTO_APPSECRET")
+	if logtoAppSecret == "" {
+		log.Fatal("env LOGTO_APPSECRET is empty")
 	}
 }
