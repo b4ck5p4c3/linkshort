@@ -7,8 +7,8 @@ tables/containers styles by @nostalgic-css [https://github.com/nostalgic-css/NES
 
 
 ### todo list
-[ ] add DELETE and UPDATE methods
-[ ] make buttons on admin page work
-[ ] add checkboxes to admin page
-[ ] add JWT-auth to backend instead verifying logto session???
-[ ] deploy it
+- [ ] add DELETE and UPDATE methods
+- [ ] make buttons on admin page work
+- [ ] add checkboxes to admin page
+- [ ] add JWT-auth to backend instead verifying logto session???
+- [ ] deploy it
