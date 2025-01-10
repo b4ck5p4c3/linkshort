@@ -157,7 +157,6 @@ func (s *Server) StartServer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	router := gin.Default()
-	router.GET("/api/v1/entries", s.GetEntries)
 	router.GET("/api/v1/:name/", s.GetEntry)
 
 	// idk what session secret is :^(
@@ -177,7 +176,10 @@ func (s *Server) StartServer(wg *sync.WaitGroup) {
 	requiesAuthGroup := router.Group("/")
 	requiesAuthGroup.Use(s.ValidateLogtoAuth)
 	requiesAuthGroup.POST("/api/v1/entries", s.AddEntry)
-	requiesAuthGroup.GET("/admin", s.AdminPage)
+	requiesAuthGroup.GET("/api/v1/entries", s.GetEntries)
+
+	requiesAuthGroup.StaticFile("/admin", "static/adminpage.html")
+	requiesAuthGroup.StaticFile("/admin.js", "static/admin.js")
 
 	endless.ListenAndServe("localhost:8080", router)
 }

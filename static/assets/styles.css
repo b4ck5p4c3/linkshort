@@ -25,12 +25,19 @@ body {
     justify-content: center;
     height: 100%;
     flex-direction: column;
+}
 
+.table-element {
+    margin: 1rem 1rem;
+    text-align: center;
 }
 
 .down {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
 
+.admin-buttons {
+    
 }
