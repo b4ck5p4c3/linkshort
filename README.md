@@ -7,6 +7,7 @@ tables/containers styles by @nostalgic-css [https://github.com/nostalgic-css/NES
 
 
 ### todo list
+- [ ] add domain validaion to backend
 - [ ] add DELETE and UPDATE methods
 - [ ] make buttons on admin page work
 - [ ] add checkboxes to admin page
