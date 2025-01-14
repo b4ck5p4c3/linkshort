@@ -75,6 +75,8 @@ function EntriesList(): ReactNode {
 
 function AddEntry(): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [requestFailedErr, setRequestFailedErr] = useState("")
+   // const [requestFailedErr, _] = useState("")
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -94,11 +96,10 @@ function AddEntry(): ReactNode {
             return
         }
 
-        urlToRedirect.value
         const req = await fetch(apiUrl, {
             method: 'POST',
             body: JSON.stringify({
-                [urlToRedirect.value]: pathElement.value
+                [pathElement.value]: urlToRedirect.value
             }),
             headers: {
                 'Content-type': 'application/json'
@@ -107,7 +108,9 @@ function AddEntry(): ReactNode {
 
         const response = await req.json();
         if (response['error'] != "") {
-            console.error(`post api call failed: ${response['error']}`)
+            setRequestFailedErr(response['error']);
+            setIsDialogOpen(false)
+            return
         }
 
         window.location.reload()
@@ -122,18 +125,28 @@ function AddEntry(): ReactNode {
                      <input type="text" name="url" className="nes-input is-dark" placeholder="url to redirect"></input>
 
                      <div className="dialog-buttons">
-                         <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(false)}>Cancel</button>
-                         <button type="submit" className="nes-btn is-primary">Confirm</button>
+                         <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(false)}>cancel</button>
+                         <button type="submit" className="nes-btn is-primary">confirm</button>
                      </div>
                  </menu>
              </form>
          </dialog>
     )
 
+    const dialogError = (
+        <dialog className="nes-dialog is-dark dialog-box" open>
+                <div className="center">
+                    adding entry failed: {requestFailedErr}
+                    <button type="button" className="nes-btn" onClick={() => setRequestFailedErr("")}>okaaay</button>
+                </div>
+        </dialog>
+    )
+
     return(
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>add entry</button>
             {isDialogOpen ? dialog: null}
+            {requestFailedErr != "" ? dialogError: null}
         </>
     )
 }
