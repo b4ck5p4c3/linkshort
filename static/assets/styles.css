@@ -49,3 +49,9 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+.dialog-box {
+    position: absolute;
+    z-index: 10;
+    top: 35%;
+}
