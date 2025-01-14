@@ -1,13 +1,18 @@
 html {
     cursor: url("./toroinoue.ico"), auto;
+    height: 100%;
 }
 
 body {
     background-image: url("./color-stars.gif");
     height: 100%;
-    padding: 0;
+}
+
+.root {
+    height: 100%;
     margin: 0;
     display: flex;
+    min-height: 100%;
     flex-direction: column;
 }
 
@@ -36,4 +41,11 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+.dialog-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }

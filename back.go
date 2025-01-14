@@ -163,12 +163,10 @@ func (s *Server) StartServer(wg *sync.WaitGroup) {
 	store := memstore.NewStore([]byte("your session secret"))
 	router.Use(sessions.Sessions("logto-session", store))
 
-	router.LoadHTMLGlob("static/*.html")
-	router.Static("/assets", "static/assets")
+	router.Static("/assets", "static/dist/assets/")
 	router.StaticFile("/oneko.gif", "static/assets/oneko.gif")
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "mainpage.tmpl", gin.H{"baseUrl": baseUrl})
-	})
+	router.StaticFile("/", "static/dist/index.html")
+	router.StaticFile("/admin", "static/dist/index.html")
 
 	router.GET("/sign-in", s.SignIn)
 	router.GET("auth-callback", s.AuthCallback)
@@ -177,9 +175,6 @@ func (s *Server) StartServer(wg *sync.WaitGroup) {
 	requiesAuthGroup.Use(s.ValidateLogtoAuth)
 	requiesAuthGroup.POST("/api/v1/entries", s.AddEntry)
 	requiesAuthGroup.GET("/api/v1/entries", s.GetEntries)
-
-	requiesAuthGroup.StaticFile("/admin", "static/adminpage.html")
-	requiesAuthGroup.StaticFile("/admin.js", "static/admin.js")
 
 	endless.ListenAndServe("localhost:8080", router)
 }
