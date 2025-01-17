@@ -34,7 +34,12 @@ export default function AdminPage() {
             <EntriesList entries={entries}></EntriesList>
 
             <div>
-                <AddEntry entries={entries} UpdateEntries={setEntries}></AddEntry>
+                <AddEntry updateEntries={(key, value) => {
+                    setEntries((oldEntries) => {
+                        const entries = new Map(oldEntries)
+                        return entries.set(key, value)
+                    })
+                }}></AddEntry>
                 <button type="button" className="nes-btn">update entry</button>
                 <DeleteEntry></DeleteEntry>
             </div>
@@ -43,8 +48,7 @@ export default function AdminPage() {
 }
 
 interface AddEntryProps {
-    entries: Map<string, string>
-    UpdateEntries: React.Dispatch<React.SetStateAction<Map<string, string>>> 
+    updateEntries: (key: string, value: string) => void
 }
 
 interface EntryProps {
@@ -83,7 +87,7 @@ function EntriesList({entries}: EntryProps): ReactNode {
     ) 
 }
 
-function AddEntry({entries, UpdateEntries}: AddEntryProps): ReactNode {
+function AddEntry({updateEntries}: AddEntryProps): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [requestFailedErr, setRequestFailedErr] = useState("")
   //  const [addedEntry, setAddedEntry] = useState("")
@@ -120,7 +124,6 @@ function AddEntry({entries, UpdateEntries}: AddEntryProps): ReactNode {
 
         const response = await req.json();
 
-        console.log(response);
         const err: string = response['error']
 
         if (err != "") {
@@ -130,18 +133,12 @@ function AddEntry({entries, UpdateEntries}: AddEntryProps): ReactNode {
         }
         
         const data: Map<string, string> = new Map(Object.entries(response['data']));
-        console.log(data);
         
         data.forEach((value, key) => {
-            UpdateEntries((entries) => {
-                return entries.set(key, value)
-            })
+            updateEntries(key, value)
         });
 
-        console.log(entries)
-
         setIsDialogOpen(false)
-       /// window.location.reload()
     }
 
     const dialog = (
