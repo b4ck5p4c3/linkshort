@@ -28,20 +28,29 @@ export default function AdminPage() {
         });
     }, [])
 
+    const addEntryUpdate = (key: string, value: string) => {
+                    setEntries((oldEntries) => {
+                        const entries = new Map(oldEntries)
+                        return entries.set(key, value)
+                    })}
+
+    const deleteEntryUpdate = (key: string) => {
+                    setEntries((oldEntries) => {
+                        const entries = new Map(oldEntries)
+                        entries.delete(key)
+                        return entries
+                    })
+    }
+
     return(
          <div className="center">
             <img src={ToroHeyyy}></img>
             <EntriesList entries={entries}></EntriesList>
 
             <div>
-                <AddEntry updateEntries={(key, value) => {
-                    setEntries((oldEntries) => {
-                        const entries = new Map(oldEntries)
-                        return entries.set(key, value)
-                    })
-                }}></AddEntry>
+                <AddEntry updateEntries={addEntryUpdate}></AddEntry>
                 <button type="button" className="nes-btn">update entry</button>
-                <DeleteEntry></DeleteEntry>
+                <DeleteEntry entries={entries} updateEntries={deleteEntryUpdate}></DeleteEntry>
             </div>
         </div>
   )
@@ -55,18 +64,28 @@ interface EntryProps {
     entries: Map<string, string>
 }
 
+//interface updateEntryProps {
+//    updateEntries: (key: string, value: string) => void
+//    entries: Map<string, string>
+//}
+
+interface deleteEntryProps {
+    updateEntries: (key: string) => void
+    entries: Map<string, string>
+}
+
 function EntriesList({entries}: EntryProps): ReactNode {
     let entryList: JSX.Element[] = [];
-        entries.forEach((value, key) => {
-            entryList.push(
-                <tr className="table-element">
-                    <td>
-                        <div className="table-element">{key}</div>
-                    </td>
-                    <td>
-                        <div className="table-element">{value}</div>
-                    </td>
-                </tr>
+    entries.forEach((value, key) => {
+        entryList.push(
+            <tr className="table-element">
+                <td>
+                    <div className="table-element">{key}</div>
+                </td>
+                <td>
+                    <div className="table-element">{value}</div>
+                </td>
+            </tr>
         )
     })
 
@@ -90,7 +109,6 @@ function EntriesList({entries}: EntryProps): ReactNode {
 function AddEntry({updateEntries}: AddEntryProps): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [requestFailedErr, setRequestFailedErr] = useState("")
-  //  const [addedEntry, setAddedEntry] = useState("")
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -99,13 +117,13 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
         const urlToRedirect = e.currentTarget.elements.namedItem("url") as HTMLInputElement| null;
 
         if (pathElement == null) {
-            console.log("cannot find text element \"path on a site\"")
+            console.error("cannot find text element \"path on a site\"")
             setIsDialogOpen(false)
             return
         }
 
         if (urlToRedirect == null) {
-            console.log("cannot find text element \"url to redirect\"")
+            console.error("cannot find text element \"url to redirect\"")
             setIsDialogOpen(false)
             return
         }
@@ -121,6 +139,10 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
 
 
         });
+
+        if (!req.ok) {
+            console.error(`api request to ${apiUrl} failed`)
+        }
 
         const response = await req.json();
 
@@ -178,11 +200,73 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
 
 
 //function DeleteEntry({entryList}: EntryProps): ReactNode {
-function DeleteEntry(): ReactNode {
+function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
+    const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        const entryIdElement = e.currentTarget.elements.namedItem("entry-id") as HTMLSelectElement | null;
+
+        if (entryIdElement == null) {
+            console.log("cannot find option element \"entry-id\"")
+            setIsDialogOpen(false)
+            return
+        }
+
+        const req = await fetch(apiUrl, {
+            method: 'DELETE',
+            body: JSON.stringify(entryIdElement.value),
+            headers: {
+                'Content-type': 'application/json'
+            }
+        })
+
+        const response = await req.json()
+        const err: string = response['error'];
+
+        if (err != "") {
+            console.error(err)
+            setIsDialogOpen(false)
+            return
+        }
+
+        const data: string = response['data'];
+
+        updateEntries(data)
+
+        setIsDialogOpen(false)
+    }
+
+    let selectList: JSX.Element[] = [];
+    entries.forEach((value, key) => {
+        selectList.push(
+            <option value={key}>{`{"${key}": "${value}"}`}</option>
+        )
+    })
+
+    const select = (
+        <div className="nes-select is-dark">
+            <select required name="entry-id">
+                <option value="" disabled selected hidden>select...</option>
+                {selectList}
+            </select>
+        </div>
+    )
+
     const dialog: ReactNode = (
-        <dialog></dialog>
+        <dialog className="nes-dialog is-dark dialog-box" open>
+            <form method="dialog" onSubmit={submitForm}>
+                <div className="center">delete entry</div>
+                <menu className="dialog-menu">
+                    {select}
+                    <div className="dialog-buttons">
+                         <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(false)}>cancel</button>
+                         <button type="submit" className="nes-btn is-primary">confirm</button>
+                    </div>
+                </menu>
+            </form>
+        </dialog>
     )
 
     return(

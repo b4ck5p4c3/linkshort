@@ -51,7 +51,7 @@ func (b *Server) GetEntries(ctx *gin.Context) {
 		entries[tempName] = tempUrl
 	}
 
-	ctx.IndentedJSON(http.StatusOK, BackendResponse{Error: "", Data: entries})
+	ctx.JSON(http.StatusOK, BackendResponse{Error: "", Data: entries})
 }
 
 func (b *Server) AddEntry(ctx *gin.Context) {
@@ -88,7 +88,7 @@ func (b *Server) AddEntry(ctx *gin.Context) {
 		}
 	}
 
-	ctx.IndentedJSON(http.StatusCreated, BackendResponse{Error: "", Data: newEntry})
+	ctx.JSON(http.StatusCreated, BackendResponse{Error: "", Data: newEntry})
 }
 
 func (b *Server) GetEntry(ctx *gin.Context) {
@@ -111,6 +111,39 @@ func (b *Server) GetEntry(ctx *gin.Context) {
 	}
 
 	ctx.Redirect(http.StatusMovedPermanently, remoteUrl)
+}
+
+func (b *Server) DeleteEntry(ctx *gin.Context) {
+	var entryToDelete string
+
+	if err := ctx.BindJSON(&entryToDelete); err != nil {
+		ctx.Error(err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, BackendResponse{Data: nil, Error: "parsing request data failed"})
+		return
+	}
+
+	result, err := b.DB.ExecContext(ctx, "DELETE from links WHERE internal_name = $1", entryToDelete)
+	if err != nil {
+		ctx.Error(fmt.Errorf("result: %v, error: %w", result, err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, BackendResponse{Error: "cannot push entry to db", Data: nil})
+		return
+	}
+
+	fmt.Println(result)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		ctx.Error(fmt.Errorf("rows_affected: %v, error: %w", rowsAffected, err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, BackendResponse{Error: "cannot get info from db", Data: nil})
+		return
+	}
+
+	if rowsAffected == 0 {
+		ctx.Error(fmt.Errorf("%v not removed from db (looks like it didnt exist)", rowsAffected))
+		ctx.AbortWithStatusJSON(http.StatusNotFound, BackendResponse{Data: nil, Error: "entry didn't exist in db"})
+	}
+
+	ctx.JSON(http.StatusOK, BackendResponse{Error: "", Data: entryToDelete})
 }
 
 func newInstance(ctx context.Context, postgresPath string, logtoEndpoint string, logtoAppId string, logtoAppSecret string) (*Server, error) {
@@ -175,6 +208,7 @@ func (s *Server) StartServer(wg *sync.WaitGroup) {
 	requiesAuthGroup.Use(s.ValidateLogtoAuth)
 	requiesAuthGroup.POST("/api/v1/entries", s.AddEntry)
 	requiesAuthGroup.GET("/api/v1/entries", s.GetEntries)
+	router.DELETE("/api/v1/entries", s.DeleteEntry)
 
 	endless.ListenAndServe("localhost:8080", router)
 }
