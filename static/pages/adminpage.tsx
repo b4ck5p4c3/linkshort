@@ -6,22 +6,8 @@ const apiUrl = window.location.origin + apiPath;
 
 
 export default function AdminPage() {
-    return(
-         <div className="center">
-            <img src={ToroHeyyy}></img>
-            <EntriesList></EntriesList>
-
-            <div>
-                <AddEntry></AddEntry>
-                <button type="button" className="nes-btn">update entry</button>
-                <button type="button" className="nes-btn">delete entry</button>
-            </div>
-        </div>
-  )
-}
-
-function EntriesList(): ReactNode {
     const [entries, setEntries] = useState(new Map<string, string>);
+
     useEffect(() => {
         fetch(apiUrl).then(response => {
             if (!response.ok) {
@@ -42,6 +28,30 @@ function EntriesList(): ReactNode {
         });
     }, [])
 
+    return(
+         <div className="center">
+            <img src={ToroHeyyy}></img>
+            <EntriesList entries={entries}></EntriesList>
+
+            <div>
+                <AddEntry entries={entries} UpdateEntries={setEntries}></AddEntry>
+                <button type="button" className="nes-btn">update entry</button>
+                <DeleteEntry></DeleteEntry>
+            </div>
+        </div>
+  )
+}
+
+interface AddEntryProps {
+    entries: Map<string, string>
+    UpdateEntries: React.Dispatch<React.SetStateAction<Map<string, string>>> 
+}
+
+interface EntryProps {
+    entries: Map<string, string>
+}
+
+function EntriesList({entries}: EntryProps): ReactNode {
     let entryList: JSX.Element[] = [];
         entries.forEach((value, key) => {
             entryList.push(
@@ -73,10 +83,10 @@ function EntriesList(): ReactNode {
     ) 
 }
 
-function AddEntry(): ReactNode {
+function AddEntry({entries, UpdateEntries}: AddEntryProps): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [requestFailedErr, setRequestFailedErr] = useState("")
-   // const [requestFailedErr, _] = useState("")
+  //  const [addedEntry, setAddedEntry] = useState("")
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -104,16 +114,34 @@ function AddEntry(): ReactNode {
             headers: {
                 'Content-type': 'application/json'
             }
+
+
         });
 
         const response = await req.json();
-        if (response['error'] != "") {
-            setRequestFailedErr(response['error']);
+
+        console.log(response);
+        const err: string = response['error']
+
+        if (err != "") {
+            setRequestFailedErr(err);
             setIsDialogOpen(false)
             return
         }
+        
+        const data: Map<string, string> = new Map(Object.entries(response['data']));
+        console.log(data);
+        
+        data.forEach((value, key) => {
+            UpdateEntries((entries) => {
+                return entries.set(key, value)
+            })
+        });
 
-        window.location.reload()
+        console.log(entries)
+
+        setIsDialogOpen(false)
+       /// window.location.reload()
     }
 
     const dialog = (
@@ -147,6 +175,23 @@ function AddEntry(): ReactNode {
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>add entry</button>
             {isDialogOpen ? dialog: null}
             {requestFailedErr != "" ? dialogError: null}
+        </>
+    )
+}
+
+
+//function DeleteEntry({entryList}: EntryProps): ReactNode {
+function DeleteEntry(): ReactNode {
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+    const dialog: ReactNode = (
+        <dialog></dialog>
+    )
+
+    return(
+        <>
+            <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>delete entry</button>
+            {isDialogOpen ? dialog: null}
         </>
     )
 }
