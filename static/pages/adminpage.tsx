@@ -75,7 +75,7 @@ interface deleteEntryProps {
 }
 
 function EntriesList({entries}: EntryProps): ReactNode {
-    let entryList: JSX.Element[] = [];
+   let entryList: JSX.Element[] = [];
     entries.forEach((value, key) => {
         entryList.push(
             <tr className="table-element">
@@ -199,9 +199,9 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
 }
 
 
-//function DeleteEntry({entryList}: EntryProps): ReactNode {
 function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [requestFailedErr, setRequestFailedErr] = useState("")
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -209,7 +209,7 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
         const entryIdElement = e.currentTarget.elements.namedItem("entry-id") as HTMLSelectElement | null;
 
         if (entryIdElement == null) {
-            console.log("cannot find option element \"entry-id\"")
+            console.error("cannot find option element \"entry-id\"")
             setIsDialogOpen(false)
             return
         }
@@ -222,13 +222,17 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
             }
         })
 
+        if (!req.ok) {
+            console.error(`api request to ${apiUrl} failed`)
+        }
+
         const response = await req.json()
         const err: string = response['error'];
 
         if (err != "") {
-            console.error(err)
-            setIsDialogOpen(false)
-            return
+            setRequestFailedErr(err);
+            setIsDialogOpen(false);
+            return;
         }
 
         const data: string = response['data'];
@@ -269,10 +273,20 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
         </dialog>
     )
 
+    const dialogError = (
+        <dialog className="nes-dialog is-dark dialog-box" open>
+                <div className="center">
+                    adding entry failed: {requestFailedErr}
+                    <button type="button" className="nes-btn" onClick={() => setRequestFailedErr("")}>okaaay</button>
+                </div>
+        </dialog>
+    )
+
     return(
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>delete entry</button>
             {isDialogOpen ? dialog: null}
+            {requestFailedErr != "" ? dialogError: null}
         </>
     )
 }
