@@ -14,33 +14,33 @@ export default function AdminPage() {
                 throw new Error(`network response failed from url ${apiUrl}`);
             }
 
-            return response.json()
+            return response.json();
         }).then(jsonResponse => {
             const error: string = jsonResponse['error'];
             if (error != "") {
-                throw new Error(error)
+                throw new Error(error);
             }
 
             const data: Map<string, string> = new Map(Object.entries(jsonResponse['data']));
-            setEntries(data)
+            setEntries(data);
         }).catch(error => {
-            console.error(`api call failed: ${error}`)
+            console.error(`api call failed: ${error}`);
         });
-    }, [])
+    }, []);
 
     const addEntryUpdate = (key: string, value: string) => {
                     setEntries((oldEntries) => {
-                        const entries = new Map(oldEntries)
-                        return entries.set(key, value)
-                    })}
+                        const entries = new Map(oldEntries);
+                        return entries.set(key, value);
+                    });};
 
     const deleteEntryUpdate = (key: string) => {
                     setEntries((oldEntries) => {
-                        const entries = new Map(oldEntries)
-                        entries.delete(key)
-                        return entries
-                    })
-    }
+                        const entries = new Map(oldEntries);
+                        entries.delete(key);
+                        return entries;
+                    });
+    };
 
     return(
          <div className="center">
@@ -53,7 +53,7 @@ export default function AdminPage() {
                 <DeleteEntry entries={entries} updateEntries={deleteEntryUpdate}></DeleteEntry>
             </div>
         </div>
-  )
+  );
 }
 
 function errorDialog(errorText: string, okButtonOnclick: () => void): ReactNode {
@@ -64,7 +64,7 @@ function errorDialog(errorText: string, okButtonOnclick: () => void): ReactNode 
                     <button type="button" className="nes-btn" onClick={okButtonOnclick}>okaaay</button>
                 </div>
         </dialog>
-    )
+    );
 }
 
 interface EntriesListProps {
@@ -72,7 +72,7 @@ interface EntriesListProps {
 }
 
 function EntriesList({entries}: EntriesListProps): ReactNode {
-   let entryList: JSX.Element[] = [];
+   const entryList: JSX.Element[] = [];
     entries.forEach((value, key) => {
         entryList.push(
             <tr className="table-element">
@@ -83,8 +83,8 @@ function EntriesList({entries}: EntriesListProps): ReactNode {
                     <div className="table-element">{value}</div>
                 </td>
             </tr>
-        )
-    })
+        );
+    });
 
     return(
             <div className="table">
@@ -100,7 +100,7 @@ function EntriesList({entries}: EntriesListProps): ReactNode {
                     </tbody>
                 </table>
             </div>
-    ) 
+    ); 
 }
 
 interface AddEntryProps {
@@ -108,8 +108,8 @@ interface AddEntryProps {
 }
 
 function AddEntry({updateEntries}: AddEntryProps): ReactNode {
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [requestFailedErr, setRequestFailedErr] = useState("")
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [requestFailedErr, setRequestFailedErr] = useState("");
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -118,15 +118,15 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
         const urlToRedirect = e.currentTarget.elements.namedItem("url") as HTMLInputElement| null;
 
         if (pathElement == null) {
-            console.error("cannot find text element \"path on a site\"")
-            setIsDialogOpen(false)
-            return
+            console.error("cannot find text element \"path on a site\"");
+            setIsDialogOpen(false);
+            return;
         }
 
         if (urlToRedirect == null) {
-            console.error("cannot find text element \"url to redirect\"")
-            setIsDialogOpen(false)
-            return
+            console.error("cannot find text element \"url to redirect\"");
+            setIsDialogOpen(false);
+            return;
         }
 
         const req = await fetch(apiUrl, {
@@ -142,27 +142,27 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
         });
 
         if (!req.ok) {
-            console.error(`api request to ${apiUrl} failed`)
+            console.error(`api request to ${apiUrl} failed`);
         }
 
         const response = await req.json();
 
-        const err: string = response['error']
+        const err: string = response['error'];
 
         if (err != "") {
             setRequestFailedErr(err);
-            setIsDialogOpen(false)
-            return
+            setIsDialogOpen(false);
+            return;
         }
         
         const data: Map<string, string> = new Map(Object.entries(response['data']));
         
         data.forEach((value, key) => {
-            updateEntries(key, value)
+            updateEntries(key, value);
         });
 
-        setIsDialogOpen(false)
-    }
+        setIsDialogOpen(false);
+    };
 
     const dialog = (
         <dialog className="nes-dialog is-dark dialog-box" open>
@@ -179,15 +179,15 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
                  </menu>
              </form>
          </dialog>
-    )
+    );
 
     return(
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>add entry</button>
             {isDialogOpen ? dialog: null}
-            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("")}): null}
+            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("");}): null}
         </>
-    )
+    );
 }
 
 interface deleteEntryProps {
@@ -196,18 +196,18 @@ interface deleteEntryProps {
 }
 
 function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [requestFailedErr, setRequestFailedErr] = useState("")
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [requestFailedErr, setRequestFailedErr] = useState("");
 
     const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+        e.preventDefault();
 
         const entryIdElement = e.currentTarget.elements.namedItem("entry-id") as HTMLSelectElement | null;
 
         if (entryIdElement == null) {
-            console.error("cannot find option element \"entry-id\"")
-            setIsDialogOpen(false)
-            return
+            console.error("cannot find option element \"entry-id\"");
+            setIsDialogOpen(false);
+            return;
         }
 
         const req = await fetch(apiUrl, {
@@ -216,13 +216,13 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
             headers: {
                 'Content-type': 'application/json'
             }
-        })
+        });
 
         if (!req.ok) {
-            console.error(`api request to ${apiUrl} failed`)
+            console.error(`api request to ${apiUrl} failed`);
         }
 
-        const response = await req.json()
+        const response = await req.json();
         const err: string = response['error'];
 
         if (err != "") {
@@ -233,17 +233,17 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
 
         const data: string = response['data'];
 
-        updateEntries(data)
+        updateEntries(data);
 
-        setIsDialogOpen(false)
-    }
+        setIsDialogOpen(false);
+    };
 
-    let selectList: JSX.Element[] = [];
+    const selectList: JSX.Element[] = [];
     entries.forEach((value, key) => {
         selectList.push(
             <option value={key}>{`{"${key}": "${value}"}`}</option>
-        )
-    })
+        );
+    });
 
     const select = (
         <div className="nes-select is-dark">
@@ -252,7 +252,7 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
                 {selectList}
             </select>
         </div>
-    )
+    );
 
     const dialog: ReactNode = (
         <dialog className="nes-dialog is-dark dialog-box" open>
@@ -267,13 +267,13 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
                 </menu>
             </form>
         </dialog>
-    )
+    );
 
     return(
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>delete entry</button>
             {isDialogOpen ? dialog: null}
-            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("")}): null}
+            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("");}): null}
         </>
-    )
+    );
 }

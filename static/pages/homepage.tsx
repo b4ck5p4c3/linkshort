@@ -1,9 +1,9 @@
 import ToroHeyyy from "./../assets/toro_heyyy.png";
-import ToroSeating from "./../assets/toro_seating.png"
-import ToroEat from "./../assets/toro_eat.png"
+import ToroSeating from "./../assets/toro_seating.png";
+import ToroEat from "./../assets/toro_eat.png";
 
 export default function HomePage() {
-    const loginUrl = `${window.location.origin}/sign-in`
+    const loginUrl = `${window.location.origin}/sign-in`;
     const B4CKUrl = "0x08.in";
 
     return(
@@ -21,7 +21,7 @@ export default function HomePage() {
             <img src={ToroEat} width="256" height="256"></img>
         </div>
         </>
-    )
+    );
 }
 
 
