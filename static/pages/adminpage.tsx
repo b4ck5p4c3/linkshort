@@ -56,16 +56,18 @@ export default function AdminPage() {
   );
 }
 
+
 function errorDialog(errorText: string, okButtonOnclick: () => void): ReactNode {
     return (
         <dialog className="nes-dialog is-dark dialog-box" open>
                 <div className="center">
-                    adding entry failed: {errorText}
+                    {errorText}
                     <button type="button" className="nes-btn" onClick={okButtonOnclick}>okaaay</button>
                 </div>
         </dialog>
     );
 }
+
 
 interface EntriesListProps {
     entries: Map<string, string>
@@ -102,6 +104,7 @@ function EntriesList({entries}: EntriesListProps): ReactNode {
             </div>
     ); 
 }
+
 
 interface AddEntryProps {
     updateEntries: (key: string, value: string) => void
@@ -185,10 +188,11 @@ function AddEntry({updateEntries}: AddEntryProps): ReactNode {
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>add entry</button>
             {isDialogOpen ? dialog: null}
-            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("");}): null}
+            {requestFailedErr != "" ? errorDialog(`adding entry failed: ${requestFailedErr}`, () => {setRequestFailedErr("");}): null}
         </>
     );
 }
+
 
 interface deleteEntryProps {
     updateEntries: (key: string) => void
@@ -273,7 +277,57 @@ function DeleteEntry({entries, updateEntries}: deleteEntryProps): ReactNode {
         <>
             <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>delete entry</button>
             {isDialogOpen ? dialog: null}
-            {requestFailedErr != "" ? errorDialog(requestFailedErr, () => {setRequestFailedErr("");}): null}
+            {requestFailedErr != "" ? errorDialog(`deleting entry failed: ${requestFailedErr}`, () => {setRequestFailedErr("");}): null}
+        </>
+    );
+}
+
+interface updateEntryProps {
+    updateEntries: (key: string) => void
+    entries: Map<string, string>
+}
+
+function UpdateEntry({updateEntries, entries}: updateEntryProps): ReactNode {
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [requestFailedErr, setRequestFailedErr] = useState("");
+    updateEntries("puk");
+
+    const selectList: JSX.Element[] = [];
+    entries.forEach((value, key) => {
+        selectList.push(
+            <option value={key}>{`{"${key}": "${value}"}`}</option>
+        );
+    });
+
+    const select = (
+        <div className="nes-select is-dark">
+            <select required name="entry-id">
+                <option value="" disabled selected hidden>select...</option>
+                {selectList}
+            </select>
+        </div>
+    );
+
+    const dialog: ReactNode = (
+        <dialog className="nes-dialog is-dark dialog-box" open>
+            <form method="dialog">
+                <div className="center">update entry</div>
+                <menu className="dialog-menu">
+                    {select}
+                    <div className="dialog-buttons">
+                         <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(false)}>cancel</button>
+                         <button type="submit" className="nes-btn is-primary">confirm</button>
+                    </div>
+                </menu>
+            </form>
+        </dialog>
+    );
+
+    return(
+        <>
+            <button type="button" className="nes-btn" onClick={() => setIsDialogOpen(true)}>delete entry</button>
+            {isDialogOpen ? dialog: null}
+            {requestFailedErr != "" ? errorDialog(`deleting entry failed: ${requestFailedErr}`, () => {setRequestFailedErr("");}): null}
         </>
     );
 }
